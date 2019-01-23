@@ -3,33 +3,33 @@
 #include "Box2D.h"
 
 class ofxBox2dRender : public b2Draw {
-	
+
 public:
-	
+
 	float scaleFactor;
-	
+
 	void setScale(float f) {
 		scaleFactor = f;
 	}
-	
+
 	void DrawPolygon(const b2Vec2* vertices, int32 vertexCount, const b2Color& color) {
 		ofSetColor(color.r*255.0, color.g*255.0, color.b*255.0);
 		ofBeginShape();
-		for (int i = 0; i < vertexCount; ++i) {
+		for (auto i = 0; i < vertexCount; ++i) {
 			ofVertex(vertices[i].x*OFX_BOX2D_SCALE, vertices[i].y*OFX_BOX2D_SCALE);
 		}
 		ofEndShape();
 	}
 	void DrawSolidPolygon(const b2Vec2* vertices, int32 vertexCount, const b2Color& color) {
-		
+
 		ofSetHexColor(0xffffff);
 		ofBeginShape();
-		for(int i=0; i<vertexCount; ++i) {
+		for(auto i=0; i<vertexCount; ++i) {
 			ofVertex(vertices[i].x*OFX_BOX2D_SCALE, vertices[i].y*OFX_BOX2D_SCALE);
 		}
 		ofEndShape();
-		
-	
+
+
 	}
 	void DrawCircle(const b2Vec2& center, float32 radius, const b2Color& color) {
 		const float32 k_segments = 16.0f;
@@ -37,7 +37,7 @@ public:
 		float32 theta = 0.0f;
 		ofSetColor(color.r*255.0, color.g*255.0, color.b*255.0);
 		ofBeginShape();
-		for (int i = 0; i < k_segments; i++) {
+		for (auto i = 0; i < k_segments; i++) {
 			b2Vec2 v = center + radius * b2Vec2(cosf(theta), sinf(theta));
 			ofVertex(v.x, v.y);
 			theta += k_increment;
@@ -45,9 +45,9 @@ public:
 		ofEndShape();
 	}
 	void DrawSolidCircle(const b2Vec2& center, float32 radius, const b2Vec2& axis, const b2Color& color) {
-		const float32 k_segments    = 16.0f;
-		const float32 k_increment   = 2.0f * b2_pi / k_segments;
-		float32 theta			    = 0.0f;
+// 		const float32 k_segments    = 16.0f;
+// 		const float32 k_increment   = 2.0f * b2_pi / k_segments;
+// 		float32 theta			    = 0.0f;
 		float rad = (radius*scaleFactor);
 		glEnable(GL_BLEND);
 		glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -55,7 +55,8 @@ public:
 		ofFill();
 		ofDrawCircle(center.x*scaleFactor, center.y*scaleFactor, rad);
 	}
-    void DrawParticles(const b2Vec2 *centers, float32 radius, const b2ParticleColor *colors, int32 count){
+    /// Draw a particle array
+    void DrawParticles(const b2Vec2 *centers, float32 radius, const b2ParticleColor *colors, int32 count) {
         
     }
 	void DrawSegment(const b2Vec2& p1, const b2Vec2& p2, const b2Color& color) {
@@ -64,7 +65,7 @@ public:
 	}
 	void DrawTransform(const b2Transform& xf) {
 	}
-	
+
 	void DrawPoint(const b2Vec2& p, float32 size, const b2Color& color) {
 	}
 	void DrawString(int x, int y, const char* string, ...) {
@@ -78,5 +79,4 @@ public:
 		ofVertex(aabb->lowerBound.x, aabb->upperBound.y);
 		ofEndShape();
 	}
-	
 };

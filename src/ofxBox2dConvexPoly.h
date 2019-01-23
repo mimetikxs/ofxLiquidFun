@@ -4,7 +4,7 @@
 #include "ofMain.h"
 #include "ofxBox2dBaseShape.h"
 
-class ofxBox2dCircle : public ofxBox2dBaseShape {
+class ofxBox2dConvexPoly : public ofxBox2dBaseShape {
 	
 private:
 	
@@ -12,25 +12,31 @@ private:
 	
 public:
 	
+    ~ofxBox2dConvexPoly(){};
 	//------------------------------------------------
-	ofxBox2dCircle();
+	ofxBox2dConvexPoly();
 	
 	//------------------------------------------------
-	void setup(b2World * b2dworld, float x, float y, float radius);
-	void setup(b2World * b2dworld, ofVec2f &pts, float radius);
-	
-	//------------------------------------------------
-	float getRadius();
-	void  setRadius(float r);
-	
+	void setup(b2World * b2dworld, ofPolyline & line);
+    
+    
+    void setScale(float scale);
+    
 	//------------------------------------------------
 	virtual void draw();
-	
+
 	//------------------------------------------------
     void addAttractionPoint(float x, float y, float amt=1);
     void addAttractionPoint(ofVec2f pt, float amt=1);
 	
 	void addRepulsionForce(float x, float y, float amt);
 	void addRepulsionForce(ofVec2f pt, float amt);
-
+    
+    float ghettoRadius;
+    
+    b2PolygonShape shape;
+		ofVboMesh gpuCachedTesselation;
+    ofPolyline polyPts;
+    float scale;
+    
 };

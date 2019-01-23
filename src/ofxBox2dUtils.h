@@ -2,9 +2,7 @@
 #include "ofMain.h"
 #include "Box2D.h"
 
-
 #define OFX_BOX2D_SCALE 30.0f
-//#define OFX_BOX2D_SCALE 1.0f
 
 
 static float b2dNum(float f) {
@@ -12,15 +10,13 @@ static float b2dNum(float f) {
 }
 
 
-static b2Vec2 screenPtToWorldPt(const glm::vec2& p) {
+static b2Vec2 screenPtToWorldPt(ofVec2f p) {
 	return b2Vec2(p.x/OFX_BOX2D_SCALE, p.y/OFX_BOX2D_SCALE);
 }
-//static ofPoint worldPtToscreenPt(b2Vec2 p) {
-//	return ofPoint(p.x*OFX_BOX2D_SCALE, p.y*OFX_BOX2D_SCALE);
-//}
-static glm::vec2 worldPtToscreenPt(b2Vec2 p) {
-	return glm::vec2(p.x*OFX_BOX2D_SCALE, p.y*OFX_BOX2D_SCALE);
+static ofPoint worldPtToscreenPt(b2Vec2 p) {
+	return ofPoint(p.x*OFX_BOX2D_SCALE, p.y*OFX_BOX2D_SCALE);
 }
+
 
 class QueryCallback : public b2QueryCallback {
 	

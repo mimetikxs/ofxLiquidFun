@@ -37,16 +37,19 @@ ofxBox2d::~ofxBox2d() {
 	}
 #endif
     if(world) {
-            for (b2Body* f = world->GetBodyList(); f; f = f->GetNext()) {
-                world->DestroyBody(f);
-            }
-            for (b2Joint* f = world->GetJointList(); f; f = f->GetNext()) {
-                world->DestroyJoint(f);
-            }
-        /*
-        // This is not safe...
-        delete world;
-        world = NULL;*/
+        // Fix from: https://github.com/vanderlin/ofxBox2d/issues/62
+        b2Body* f = world->GetBodyList();
+        while (f) {
+            b2Body* next = f->GetNext();
+            world->DestroyBody(f);
+            f = next;
+        }
+        b2Joint* j = world->GetJointList();
+        while (j) {
+            b2Joint* next = j->GetNext();
+            world->DestroyJoint(j);
+            j = next;
+        }
     }
 }
 
@@ -84,9 +87,8 @@ void ofxBox2d::init() {
 	
 	//worldAABB.lowerBound.Set(-100.0f, -100.0f);
 	//worldAABB.upperBound.Set(100.0f, 100.0f);
-	delete world;
-    world = NULL;
-	world = new b2World(b2Vec2(gravity.x, gravity.y));
+
+    world = std::make_unique<b2World>(b2Vec2(gravity.x, gravity.y));
     world->SetAllowSleeping(doSleep);
 	//world->SetDebugDraw(&debugRender);
 	
@@ -465,7 +467,7 @@ void ofxBox2d::drawGround() {
 	
 	if(ground == NULL) return;
 	
-	const b2Transform& xf = ground->GetTransform();
+// 	const b2Transform& xf = ground->GetTransform();
 	for (b2Fixture* f = ground->GetFixtureList(); f; f = f->GetNext()) {
 		b2EdgeShape* edge = (b2EdgeShape*)f->GetShape();
 		if(edge) {
@@ -481,4 +483,3 @@ void ofxBox2d::drawGround() {
 void ofxBox2d::draw() {
 	drawGround();
 }
-

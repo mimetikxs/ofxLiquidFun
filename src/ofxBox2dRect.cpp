@@ -23,48 +23,54 @@ void ofxBox2dRect::setup(b2World * b2dworld, ofRectangle rec) {
 
 //------------------------------------------------
 void ofxBox2dRect::setup(b2World * b2dworld, float x, float y, float w, float h) {
-	
+
 	if(b2dworld == NULL) {
 		ofLog(OF_LOG_NOTICE, "- must have a valid world -");
 		return;
 	}
-	
+
     w /= 2;
     h /= 2;
 	width = w; height = h;
-    
+
 	b2PolygonShape shape;
 	shape.SetAsBox(width/OFX_BOX2D_SCALE, height/OFX_BOX2D_SCALE);
-	
+
 	fixture.shape		= &shape;
 	fixture.density		= density;
 	fixture.friction	= friction;
 	fixture.restitution = bounce;
-	
-	//b2BodyDef bodyDef; // nm: already have one of these in our base class
 
-	if (!bodyTypeSet)
-	{
-		if (density == 0.f) bodyDef.type = b2_staticBody;
-		else bodyDef.type = b2_dynamicBody;
-	}
+	b2BodyDef bodyDef;
+	if(density == 0.f) bodyDef.type	= b2_staticBody;
+	else               bodyDef.type	= b2_dynamicBody;
 	bodyDef.position.Set(x/OFX_BOX2D_SCALE, y/OFX_BOX2D_SCALE);
-	
-	
+
+
 	body = b2dworld->CreateBody(&bodyDef);
 	body->CreateFixture(&fixture);
-    
+
     updateMesh();
     alive = true;
 }
 
+// Temporary fix until OF 0.8.0
+static void rectangle(ofPath & path, const ofRectangle & r){
+	path.moveTo(r.getTopLeft());
+	path.lineTo(r.getTopRight());
+	path.lineTo(r.getBottomRight());
+	path.lineTo(r.getBottomLeft());
+	path.close();
+}
+
 //------------------------------------------------
 void ofxBox2dRect::updateMesh() {
-    
+
     float w = getWidth();
     float h = getHeight();
     ofPath path;
-    path.rectangle(-w/2, -h/2, w, h);
+    // Temporary fix until OF 0.8.0
+    rectangle(path, ofRectangle(-w/2, -h/2, w, h));
     mesh.clear();
     mesh = path.getTessellation();
     mesh.setUsage(GL_STATIC_DRAW);
@@ -72,16 +78,16 @@ void ofxBox2dRect::updateMesh() {
 /*
 //------------------------------------------------
 ofPolyline& ofxBox2dRect::getRectangleShape() {
-    
+
     if(isBody()) {
-        
+
         shape.clear();
         const b2Transform& xf = body->GetTransform();
-        
+
         for (b2Fixture* f = body->GetFixtureList(); f; f = f->GetNext()) {
             b2PolygonShape* poly = (b2PolygonShape*)f->GetShape();
             if(poly) {
-                for(int i=0; i<poly->m_count; i++) {
+                for(auto i=0; i<poly->m_count; i++) {
                     b2Vec2 pt = b2Mul(xf, poly->m_vertices[i]);
                     shape.addVertex(worldPtToscreenPt(pt));
                 }
@@ -91,7 +97,7 @@ ofPolyline& ofxBox2dRect::getRectangleShape() {
     // we are a rectangle so close it
     shape.setClosed(true);
     return shape;
-    
+
 }*/
 
 //------------------------------------------------
@@ -105,15 +111,15 @@ void ofxBox2dRect::addRepulsionForce(ofVec2f pt, float amt) {
 		const b2Transform& xf = body->GetTransform();
 		for (b2Fixture* f = body->GetFixtureList(); f; f = f->GetNext()) {
 			b2PolygonShape* poly = (b2PolygonShape*)f->GetShape();
-			
+
 			if(poly) {
 				b2Vec2 P(pt.x/OFX_BOX2D_SCALE, pt.y/OFX_BOX2D_SCALE);
-				for (int i=0; i<poly->GetVertexCount(); i++) {
-					b2Vec2 qt = b2Mul(xf, poly->GetVertex(i));
-					b2Vec2 D = P - qt; 
+				for (int i=0; i<poly->m_count; i++) {
+					b2Vec2 qt = b2Mul(xf, poly->m_vertices[i]);
+					b2Vec2 D = P - qt;
 					b2Vec2 F = amt * D;
 					body->ApplyForce(-F, P, true);
-				}                        
+				}
 			}
 		}
 	}
@@ -130,20 +136,20 @@ void ofxBox2dRect::addAttractionPoint (float fx, float fy, float amt) {
 
 //------------------------------------------------
 void ofxBox2dRect::addAttractionPoint (ofVec2f pt, float amt) {
-	
+
 	if(body != NULL) {
 		const b2Transform& xf = body->GetTransform();
 		for (b2Fixture* f = body->GetFixtureList(); f; f = f->GetNext()) {
 			b2PolygonShape* poly = (b2PolygonShape*)f->GetShape();
-			
+
 			if(poly) {
 				b2Vec2 P(pt.x/OFX_BOX2D_SCALE, pt.y/OFX_BOX2D_SCALE);
-				for (int i=0; i<poly->GetVertexCount(); i++) {
-					b2Vec2 qt = b2Mul(xf, poly->GetVertex(i));
-					b2Vec2 D = P - qt; 
+				for (int i=0; i<poly->m_count; i++) {
+					b2Vec2 qt = b2Mul(xf, poly->m_vertices[i]);
+					b2Vec2 D = P - qt;
 					b2Vec2 F = amt * D;
 					body->ApplyForce(F, P, true);
-				}                        
+				}
 			}
 		}
 	}
@@ -151,24 +157,25 @@ void ofxBox2dRect::addAttractionPoint (ofVec2f pt, float amt) {
 
 //------------------------------------------------
 void ofxBox2dRect::draw() {
-	
+
 	if(body == NULL) {
-		return;	
+		return;
 	}
-    
+
     ofPushMatrix();
     ofTranslate(ofxBox2dBaseShape::getPosition());
     ofRotateDeg(getRotation());
-    mesh.draw(ofGetFill()==OF_FILLED?OF_MESH_FILL:OF_MESH_WIREFRAME);
+    // Temporary fix until we switch to OF 0.8.0.
+    mesh.draw();
     ofPopMatrix();
-    
+
     /*
     const b2Transform& xf = body->GetTransform();
     ofPolyline shape;
     for (b2Fixture* f = body->GetFixtureList(); f; f = f->GetNext()) {
         b2PolygonShape* poly = (b2PolygonShape*)f->GetShape();
         if(poly) {
-            for(int i=0; i<poly->m_count; i++) {
+            for(auto i=0; i<poly->m_count; i++) {
                 b2Vec2 pt = b2Mul(xf, poly->m_vertices[i]);
                 shape.addVertex(worldPtToscreenPt(pt));
             }
@@ -182,16 +189,16 @@ void ofxBox2dRect::draw() {
     // getRectangleShape();
     /*
     ofPath path;
-    for (int i=0; i<shape.size(); i++) {
+    for (auto i=0; i<shape.size(); i++) {
         if(i==0)path.moveTo(shape[i]);
         else path.lineTo(shape[i]);
     }
-    
+
     // draw the path
     path.setColor(ofGetStyle().color);
     path.setFilled(ofGetStyle().bFill);
     path.draw();
-    
+
     // are we sleeping
     if(isSleeping()) {
         ofPushStyle();
@@ -203,19 +210,3 @@ void ofxBox2dRect::draw() {
     }
 	*/
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

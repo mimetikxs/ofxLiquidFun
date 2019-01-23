@@ -19,11 +19,13 @@ public:
 	ofxBox2dJoint();
 	ofxBox2dJoint(b2World* b2world, b2Body* body1, b2Body* body2, float frequencyHz=4.f, float damping=.5f, bool bCollideConnected=true);
 	ofxBox2dJoint(b2World* b2world, b2Body* body1, b2Body* body2, b2Vec2 anchor1, b2Vec2 anchor2, float frequencyHz=4.f, float damping=.5f, bool bCollideConnected=true);
+    ofxBox2dJoint(b2World* b2world, b2DistanceJointDef jointDef);
 	
 	//----------------------------------------
 	void setWorld(b2World * w);
 	void setup(b2World* b2world, b2Body* body1, b2Body* body2, float frequencyHz=4.f, float damping=.5f, bool bCollideConnected=true);
 	void setup(b2World* b2world, b2Body* body1, b2Body* body2, b2Vec2 anchor1, b2Vec2 anchor2, float frequencyHz=4.f, float damping=.5f, bool bCollideConnected=true);
+    void setup(b2World* b2world, b2DistanceJointDef jointDef);
 	
 	//----------------------------------------
 	bool isSetup();
@@ -46,15 +48,3 @@ public:
 	b2Vec2  getReactionForceB2D(float inv_dt) const;
 	float   getReactionTorque(float inv_dt) const;
 };
-
-
-
-
-
-
-
-
-
-
-
-
